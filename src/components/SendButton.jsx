@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 
-export default function SendButton({ onClick }) {
+export default function SendButton({ onClick, disabled }) {
   return (
     <>
       <style>{`
@@ -40,7 +40,7 @@ export default function SendButton({ onClick }) {
             overflow: 'hidden',
           }}
         >
-          GESCHENK SENDEN! 🎁
+          {disabled ? 'WIRD GESENDET...' : 'GESCHENK SENDEN! 🎁'}
           <motion.div
             style={{
               position: 'absolute', inset: 0,
