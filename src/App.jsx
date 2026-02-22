@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import SparkleBackground from './components/SparkleBackground'
 import Header from './components/Header'
 import DomiPhotos from './components/DomiPhotos'
@@ -7,33 +7,24 @@ import GiftGrid from './components/GiftGrid'
 import MessageForm from './components/MessageForm'
 import SendButton from './components/SendButton'
 import SuccessModal from './components/SuccessModal'
-import { GIFTS, SUCCESS_MESSAGES } from './data/gifts'
-
-function getCount() {
-  return parseInt(localStorage.getItem('domidanke-count') || '0')
-}
-
-function saveGift(gift, message, sender) {
-  const count = getCount() + 1
-  localStorage.setItem('domidanke-count', String(count))
-
-  const gifts = JSON.parse(localStorage.getItem('domidanke-gifts') || '[]')
-  gifts.push({ gift: gift.id, message, sender, timestamp: new Date().toISOString() })
-  localStorage.setItem('domidanke-gifts', JSON.stringify(gifts))
-
-  return count
-}
+import { SUCCESS_MESSAGES } from './data/gifts'
+import { sendGift, fetchGiftCount } from './lib/supabase'
 
 export default function App() {
   const [selectedGift, setSelectedGift] = useState(null)
   const [message, setMessage]           = useState('')
   const [sender, setSender]             = useState('')
   const [shaking, setShaking]           = useState(false)
-  const [giftCount, setGiftCount]       = useState(getCount)
+  const [giftCount, setGiftCount]       = useState(0)
   const [showSuccess, setShowSuccess]   = useState(false)
   const [successText, setSuccessText]   = useState('')
+  const [sending, setSending]           = useState(false)
 
-  const handleSend = useCallback(() => {
+  useEffect(() => {
+    fetchGiftCount().then(c => setGiftCount(c))
+  }, [])
+
+  const handleSend = useCallback(async () => {
     if (!selectedGift) {
       setShaking(true)
       setTimeout(() => setShaking(false), 500)
@@ -48,7 +39,11 @@ export default function App() {
       text += `<br><br><em>"${message.trim()}"</em>`
     }
 
-    const newCount = saveGift(selectedGift, message.trim(), displaySender)
+    setSending(true)
+    await sendGift(selectedGift, message.trim(), displaySender)
+    const newCount = await fetchGiftCount()
+    setSending(false)
+
     setGiftCount(newCount)
     setSuccessText(text)
     setShowSuccess(true)
@@ -81,7 +76,7 @@ export default function App() {
           onMessageChange={setMessage}
           onSenderChange={setSender}
         />
-        <SendButton onClick={handleSend} />
+        <SendButton onClick={handleSend} disabled={sending} />
 
         <p style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.78rem', paddingBottom: 8 }}>
           Made with ❤️ für Domi &nbsp;|&nbsp; DOMIDANKE 2026
