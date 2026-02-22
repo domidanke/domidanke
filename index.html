@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOMIDANKE - Schenke Domi ein Geschenk!</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gold: #FFD700;
+            --gold-dark: #B8860B;
+            --pink: #FF6B9D;
+            --purple: #8B5CF6;
+            --bg: #0F0A1A;
+            --card-bg: #1A1128;
+            --text: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-sparkles {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--gold);
+            border-radius: 50%;
+            animation: sparkle-float linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes sparkle-float {
+            0% { opacity: 0; transform: translateY(100vh) scale(0); }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-10vh) scale(1); }
+        }
+
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 40px 0 20px;
+        }
+
+        .header h1 {
+            font-family: 'Fredoka One', cursive;
+            font-size: clamp(3rem, 10vw, 5rem);
+            background: linear-gradient(135deg, var(--gold), #FFF8DC, var(--gold), var(--gold-dark));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gold-shimmer 3s ease infinite;
+            text-shadow: none;
+            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.3));
+            letter-spacing: 4px;
+        }
+
+        @keyframes gold-shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: #C9B3FF;
+            margin-top: 8px;
+            font-weight: 700;
+        }
+
+        /* Domi Photos Carousel */
+        .domi-photos {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .domi-photo {
+            width: 140px;
+            height: 180px;
+            border-radius: 20px;
+            border: 3px solid var(--gold);
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            background: linear-gradient(135deg, #2D1B4E, #1A1128);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .domi-photo:hover {
+            transform: scale(1.08) rotate(-2deg);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+        }
+
+        .domi-photo:nth-child(2):hover {
+            transform: scale(1.08) rotate(2deg);
+        }
+
+        .domi-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .domi-photo .photo-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            padding: 20px 8px 8px;
+            font-size: 0.75rem;
+            text-align: center;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        /* Section titles */
+        .section-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.5rem;
+            text-align: center;
+            margin: 30px 0 20px;
+            color: var(--gold);
+        }
+
+        .section-desc {
+            text-align: center;
+            color: #A78BFA;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+
+        /* Gift Grid */
+        .gift-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .gift-card {
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 20px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gift-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(255,215,0,0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .gift-card:hover::before,
+        .gift-card.selected::before {
+            opacity: 1;
+        }
+
+        .gift-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.15);
+        }
+
+        .gift-card.selected {
+            border-color: var(--gold);
+            background: #2D1B4E;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .gift-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            display: block;
+            transition: transform 0.3s;
+        }
+
+        .gift-card:hover .gift-emoji {
+            transform: scale(1.2) rotate(10deg);
+            animation: wiggle 0.5s ease;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: scale(1.2) rotate(0deg); }
+            25% { transform: scale(1.2) rotate(10deg); }
+            75% { transform: scale(1.2) rotate(-10deg); }
+        }
+
+        .gift-name {
+            font-weight: 900;
+            font-size: 0.85rem;
+            color: var(--text);
+        }
+
+        .gift-desc {
+            font-size: 0.7rem;
+            color: #A78BFA;
+            margin-top: 4px;
+        }
+
+        /* Message Area */
+        .message-area {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 30px;
+            border: 2px solid #2D1B4E;
+        }
+
+        .message-area label {
+            display: block;
+            font-weight: 900;
+            margin-bottom: 10px;
+            color: var(--gold);
+            font-size: 1rem;
+        }
+
+        .message-area textarea {
+            width: 100%;
+            min-height: 100px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid #3D2B5E;
+            border-radius: 12px;
+            padding: 14px;
+            color: var(--text);
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        .message-area textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+        }
+
+        .message-area textarea::placeholder {
+            color: #6B5B8A;
+        }
+
+        .sender-input {
+            margin-top: 12px;
+        }
+
+        .sender-input input {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid #3D2B5E;
+            border-radius: 12px;
+            padding: 12px 14px;
+            color: var(--text);
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .sender-input input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .sender-input input::placeholder {
+            color: #6B5B8A;
+        }
+
+        /* Send Button */
+        .send-btn {
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto 40px;
+            padding: 18px 40px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.4rem;
+            color: #0F0A1A;
+            background: linear-gradient(135deg, var(--gold), #FFF8DC, var(--gold));
+            background-size: 200% 200%;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: gold-shimmer 3s ease infinite;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
+        }
+
+        .send-btn:active {
+            transform: scale(0.98);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .send-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(45deg);
+            animation: btn-shine 4s ease infinite;
+        }
+
+        @keyframes btn-shine {
+            0%, 100% { transform: rotate(45deg) translateX(-100%); }
+            50% { transform: rotate(45deg) translateX(100%); }
+        }
+
+        /* Success Overlay */
+        .success-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(15, 10, 26, 0.95);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .success-overlay.active {
+            display: flex;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .success-domi {
+            width: 200px;
+            height: 250px;
+            border-radius: 24px;
+            border: 4px solid var(--gold);
+            overflow: hidden;
+            margin-bottom: 24px;
+            animation: bounceIn 0.6s ease;
+            background: linear-gradient(135deg, #2D1B4E, #1A1128);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-domi img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+            60% { transform: scale(1.1) rotate(3deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .success-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.5rem;
+            color: var(--gold);
+            margin-bottom: 12px;
+            animation: bounceIn 0.6s ease 0.2s both;
+        }
+
+        .success-message {
+            font-size: 1.1rem;
+            color: #C9B3FF;
+            max-width: 400px;
+            line-height: 1.6;
+            animation: bounceIn 0.6s ease 0.4s both;
+        }
+
+        .success-btn {
+            margin-top: 30px;
+            padding: 14px 40px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1rem;
+            color: var(--gold);
+            background: transparent;
+            border: 2px solid var(--gold);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: bounceIn 0.6s ease 0.6s both;
+        }
+
+        .success-btn:hover {
+            background: var(--gold);
+            color: #0F0A1A;
+        }
+
+        /* Confetti canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 101;
+        }
+
+        /* Fun counter */
+        .gift-counter {
+            text-align: center;
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(139,92,246,0.1));
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #C9B3FF;
+        }
+
+        .gift-counter strong {
+            color: var(--gold);
+            font-size: 1.2rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #4A3B6A;
+            font-size: 0.8rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 500px) {
+            .domi-photo {
+                width: 100px;
+                height: 130px;
+            }
+
+            .gift-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Reaction popup */
+        .reaction-popup {
+            position: fixed;
+            font-size: 3rem;
+            pointer-events: none;
+            z-index: 50;
+            animation: float-up 1.5s ease forwards;
+        }
+
+        @keyframes float-up {
+            0% { opacity: 1; transform: scale(0.5) translateY(0); }
+            50% { opacity: 1; transform: scale(1.2) translateY(-50px); }
+            100% { opacity: 0; transform: scale(0.8) translateY(-120px); }
+        }
+
+        /* Placeholder photo styling */
+        .photo-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            font-size: 3rem;
+            background: linear-gradient(135deg, #2D1B4E, #4A2D7A);
+        }
+
+        .photo-placeholder span {
+            font-size: 0.65rem;
+            color: var(--gold);
+            margin-top: 4px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-sparkles" id="sparkles"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>DOMIDANKE</h1>
+            <p class="subtitle">Schenke Domi etwas Lustiges & Kreatives!</p>
+        </div>
+
+        <!-- Domi Photo Gallery -->
+        <div class="domi-photos">
+            <div class="domi-photo" onclick="photoBounce(this)">
+                <img src="images/domi1.jpg" alt="Domi Pose 1" onerror="this.parentElement.innerHTML='<div class=\'photo-placeholder\'>&#128526;<span>BOSS DOMI</span></div>'">
+                <div class="photo-label">Der Boss</div>
+            </div>
+            <div class="domi-photo" onclick="photoBounce(this)">
+                <img src="images/domi2.jpg" alt="Domi Pose 2" onerror="this.parentElement.innerHTML='<div class=\'photo-placeholder\'>&#128562;<span>SHOCKED DOMI</span></div>'">
+                <div class="photo-label">Überrascht</div>
+            </div>
+            <div class="domi-photo" onclick="photoBounce(this)">
+                <img src="images/domi3.jpg" alt="Domi Pose 3" onerror="this.parentElement.innerHTML='<div class=\'photo-placeholder\'>&#129321;<span>PARTY DOMI</span></div>'">
+                <div class="photo-label">Partymodus</div>
+            </div>
+        </div>
+
+        <!-- Gift Counter -->
+        <div class="gift-counter">
+            Domi hat bereits <strong id="counter">0</strong> Geschenke erhalten! Sei der/die Nächste!
+        </div>
+
+        <!-- Gift Selection -->
+        <p class="section-title">Wähle ein Geschenk aus</p>
+        <p class="section-desc">Klicke auf das perfekte Geschenk für Domi</p>
+
+        <div class="gift-grid" id="gift-grid">
+            <div class="gift-card" data-gift="trophy" onclick="selectGift(this)">
+                <span class="gift-emoji">🏆</span>
+                <div class="gift-name">Goldener Pokal</div>
+                <div class="gift-desc">Für den absoluten Champion</div>
+            </div>
+            <div class="gift-card" data-gift="hug" onclick="selectGift(this)">
+                <span class="gift-emoji">🤗</span>
+                <div class="gift-name">Virtuelle Umarmung</div>
+                <div class="gift-desc">Wärmer als jede Heizung</div>
+            </div>
+            <div class="gift-card" data-gift="crown" onclick="selectGift(this)">
+                <span class="gift-emoji">👑</span>
+                <div class="gift-name">Dankeschön-Krone</div>
+                <div class="gift-desc">Für den König von allem</div>
+            </div>
+            <div class="gift-card" data-gift="confetti" onclick="selectGift(this)">
+                <span class="gift-emoji">🎊</span>
+                <div class="gift-name">Konfetti-Regen</div>
+                <div class="gift-desc">Party für Domi!</div>
+            </div>
+            <div class="gift-card" data-gift="rocket" onclick="selectGift(this)">
+                <span class="gift-emoji">🚀</span>
+                <div class="gift-name">Raketen-Boost</div>
+                <div class="gift-desc">Ab zum Mond!</div>
+            </div>
+            <div class="gift-card" data-gift="pizza" onclick="selectGift(this)">
+                <span class="gift-emoji">🍕</span>
+                <div class="gift-name">Endlos Pizza</div>
+                <div class="gift-desc">Unendlicher Vorrat</div>
+            </div>
+            <div class="gift-card" data-gift="muscle" onclick="selectGift(this)">
+                <span class="gift-emoji">💪</span>
+                <div class="gift-name">Power-Up</div>
+                <div class="gift-desc">+1000 Stärke für Domi</div>
+            </div>
+            <div class="gift-card" data-gift="diamond" onclick="selectGift(this)">
+                <span class="gift-emoji">💎</span>
+                <div class="gift-name">Diamant-Status</div>
+                <div class="gift-desc">Nur das Beste vom Besten</div>
+            </div>
+            <div class="gift-card" data-gift="beer" onclick="selectGift(this)">
+                <span class="gift-emoji">🍺</span>
+                <div class="gift-name">Ein kühles Bier</div>
+                <div class="gift-desc">Prost, Domi!</div>
+            </div>
+            <div class="gift-card" data-gift="star" onclick="selectGift(this)">
+                <span class="gift-emoji">⭐</span>
+                <div class="gift-name">Goldener Stern</div>
+                <div class="gift-desc">Du bist ein Star!</div>
+            </div>
+            <div class="gift-card" data-gift="fire" onclick="selectGift(this)">
+                <span class="gift-emoji">🔥</span>
+                <div class="gift-name">Feuer-Modus</div>
+                <div class="gift-desc">Domi ist on fire!</div>
+            </div>
+            <div class="gift-card" data-gift="unicorn" onclick="selectGift(this)">
+                <span class="gift-emoji">🦄</span>
+                <div class="gift-name">Magisches Einhorn</div>
+                <div class="gift-desc">Für den besonderen Zauber</div>
+            </div>
+        </div>
+
+        <!-- Message -->
+        <div class="message-area">
+            <label>📝 Deine Nachricht an Domi:</label>
+            <textarea id="message" placeholder="Schreib was Lustiges, Nettes oder total Verrücktes..."></textarea>
+            <div class="sender-input">
+                <label>✍️ Dein Name:</label>
+                <input type="text" id="sender" placeholder="Wer bist du? (oder bleib anonym, du Geheimnis)">
+            </div>
+        </div>
+
+        <!-- Send Button -->
+        <button class="send-btn" id="send-btn" onclick="sendGift()">
+            GESCHENK SENDEN! 🎁
+        </button>
+
+        <!-- Footer -->
+        <div class="footer">
+            Made with ❤️ für Domi | DOMIDANKE 2026
+        </div>
+    </div>
+
+    <!-- Success Overlay -->
+    <div class="success-overlay" id="success-overlay">
+        <div class="success-domi" id="success-photo">
+            <img src="images/domi2.jpg" alt="Domi happy" onerror="this.parentElement.innerHTML='<div class=\'photo-placeholder\' style=\'font-size:4rem\'>🥳<span>DOMI FEIERT!</span></div>'">
+        </div>
+        <div class="success-title">DANKE!</div>
+        <p class="success-message" id="success-text">
+            Domi hat dein Geschenk erhalten und flippt total aus! 🎉
+        </p>
+        <button class="success-btn" onclick="closeSuccess()">Noch ein Geschenk senden!</button>
+    </div>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <script>
+        // ====== Background Sparkles ======
+        (function createSparkles() {
+            const container = document.getElementById('sparkles');
+            for (let i = 0; i < 40; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.animationDuration = (4 + Math.random() * 6) + 's';
+                sparkle.style.animationDelay = Math.random() * 5 + 's';
+                sparkle.style.width = sparkle.style.height = (2 + Math.random() * 4) + 'px';
+                container.appendChild(sparkle);
+            }
+        })();
+
+        // ====== Gift Selection ======
+        let selectedGift = null;
+
+        function selectGift(el) {
+            document.querySelectorAll('.gift-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedGift = el.dataset.gift;
+
+            // Fun emoji reaction
+            spawnReaction(el.querySelector('.gift-emoji').textContent, el);
+        }
+
+        function spawnReaction(emoji, el) {
+            const rect = el.getBoundingClientRect();
+            const popup = document.createElement('div');
+            popup.className = 'reaction-popup';
+            popup.textContent = emoji;
+            popup.style.left = (rect.left + rect.width / 2 - 20) + 'px';
+            popup.style.top = (rect.top) + 'px';
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 1500);
+        }
+
+        // ====== Photo Bounce ======
+        function photoBounce(el) {
+            el.style.animation = 'none';
+            el.offsetHeight;
+            el.style.animation = 'bounceIn 0.5s ease';
+        }
+
+        // ====== Gift Counter ======
+        let giftCount = parseInt(localStorage.getItem('domidanke-count') || '0');
+        document.getElementById('counter').textContent = giftCount;
+
+        // ====== Send Gift ======
+        function sendGift() {
+            if (!selectedGift) {
+                shakeElement(document.getElementById('gift-grid'));
+                return;
+            }
+
+            const message = document.getElementById('message').value.trim();
+            const sender = document.getElementById('sender').value.trim() || 'Anonymer Held';
+
+            // Increment counter
+            giftCount++;
+            localStorage.setItem('domidanke-count', giftCount.toString());
+            document.getElementById('counter').textContent = giftCount;
+
+            // Build success message
+            const giftNames = {
+                trophy: '🏆 Goldener Pokal',
+                hug: '🤗 Virtuelle Umarmung',
+                crown: '👑 Dankeschön-Krone',
+                confetti: '🎊 Konfetti-Regen',
+                rocket: '🚀 Raketen-Boost',
+                pizza: '🍕 Endlos Pizza',
+                muscle: '💪 Power-Up',
+                diamond: '💎 Diamant-Status',
+                beer: '🍺 Ein kühles Bier',
+                star: '⭐ Goldener Stern',
+                fire: '🔥 Feuer-Modus',
+                unicorn: '🦄 Magisches Einhorn'
+            };
+
+            const funResponses = [
+                `${sender} hat Domi "${giftNames[selectedGift]}" geschenkt! Domi ist sprachlos (fast)!`,
+                `BOOM! ${sender} schickt "${giftNames[selectedGift]}" - Domi tanzt vor Freude!`,
+                `${sender} sagt DANKE mit "${giftNames[selectedGift]}" - Domi's Tag ist gerettet!`,
+                `"${giftNames[selectedGift]}" von ${sender}! Domi weint vor Glück (happy tears only)!`,
+                `${sender} ist ein wahrer Held! "${giftNames[selectedGift]}" wurde erfolgreich an Domi überreicht!`
+            ];
+
+            const responseText = funResponses[Math.floor(Math.random() * funResponses.length)];
+            const fullText = message
+                ? `${responseText}<br><br>Nachricht: "${message}"`
+                : responseText;
+
+            document.getElementById('success-text').innerHTML = fullText;
+
+            // Show overlay
+            document.getElementById('success-overlay').classList.add('active');
+
+            // Fire confetti
+            launchConfetti();
+
+            // Save gift to local storage history
+            const gifts = JSON.parse(localStorage.getItem('domidanke-gifts') || '[]');
+            gifts.push({
+                gift: selectedGift,
+                message: message,
+                sender: sender,
+                timestamp: new Date().toISOString()
+            });
+            localStorage.setItem('domidanke-gifts', JSON.stringify(gifts));
+        }
+
+        function closeSuccess() {
+            document.getElementById('success-overlay').classList.remove('active');
+            // Reset form
+            selectedGift = null;
+            document.querySelectorAll('.gift-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('message').value = '';
+            document.getElementById('sender').value = '';
+        }
+
+        function shakeElement(el) {
+            el.style.animation = 'none';
+            el.offsetHeight;
+            el.style.animation = 'shake 0.5s ease';
+        }
+
+        // Add shake animation dynamically
+        const shakeStyle = document.createElement('style');
+        shakeStyle.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                20% { transform: translateX(-10px); }
+                40% { transform: translateX(10px); }
+                60% { transform: translateX(-5px); }
+                80% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(shakeStyle);
+
+        // ====== Confetti ======
+        function launchConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const pieces = [];
+            const colors = ['#FFD700', '#FF6B9D', '#8B5CF6', '#00D4FF', '#FF4444', '#44FF44', '#FFF8DC'];
+            const totalPieces = 150;
+
+            for (let i = 0; i < totalPieces; i++) {
+                pieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    w: 5 + Math.random() * 10,
+                    h: 5 + Math.random() * 6,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vy: 2 + Math.random() * 4,
+                    vx: -2 + Math.random() * 4,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: -3 + Math.random() * 6,
+                    opacity: 1
+                });
+            }
+
+            let frameCount = 0;
+            const maxFrames = 180;
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                frameCount++;
+
+                pieces.forEach(p => {
+                    p.y += p.vy;
+                    p.x += p.vx;
+                    p.rotation += p.rotationSpeed;
+                    p.vy += 0.05;
+
+                    if (frameCount > maxFrames - 60) {
+                        p.opacity -= 0.016;
+                    }
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.globalAlpha = Math.max(0, p.opacity);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                    ctx.restore();
+                });
+
+                if (frameCount < maxFrames) {
+                    requestAnimationFrame(animate);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+
+            animate();
+        }
+
+        // Handle window resize for confetti
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('confetti-canvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
